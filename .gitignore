@@ -5,3 +5,18 @@ experiments/results/
 .env
 .DS_Store
 *.egg-info/
+
+# Python env
+.venv/
+
+# Local data (never commit)
+data/tcga/
+data/**
+
+# Common large artifacts
+*.pkl
+*.jsonl
+*.log
+
+# vLLM outputs
+vllm_outputs/
