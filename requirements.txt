@@ -12,3 +12,4 @@ pandas
 pytest
 ruff
 pre-commit
+scikit-learn
