@@ -1,0 +1,19 @@
+run_name: "baseline-vision"
+seed: 42
+data:
+  visual_embeddings_path: "data/tcga_titan_embeddings.pkl"
+  text_embeddings_path: "data/tcga_text_embeddings.pkl"
+  labels_path: "data/tcga_patient_to_cancer_type.csv"
+  splits_dir: "data/splits"
+  label_mapping: "data/label_mapping.json"
+model:
+  modality: "vision" 
+  visual_dim: 768
+  text_dim: 0     
+  hidden_dim: 256
+  num_classes: 32
+  dropout: 0.2
+training:
+  epochs: 20
+  batch_size: 32
+  learning_rate: 0.001

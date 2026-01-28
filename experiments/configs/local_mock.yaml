@@ -1,0 +1,22 @@
+run_name: "local-mock-run"
+seed: 42
+
+data:
+  visual_embeddings_path: "data/mock_visual.pkl"
+  text_embeddings_path: "data/mock_text.pkl"
+  labels_path: "data/mock_labels.csv"
+  splits_dir: "data/splits"
+  label_mapping: "data/label_mapping.json"
+
+model:
+  modality: "multimodal"
+  visual_dim: 768
+  text_dim: 768
+  hidden_dim: 128
+  num_classes: 32
+  dropout: 0.1
+
+training:
+  epochs: 2
+  learning_rate: 0.001
+  batch_size: 10

@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/jettejohannadw/mlops-assignment-FINAL/mlruns/912748698813041948/d59546974f5b45e381b1e09d40c657f8/artifacts
+end_time: 1769596635114
+entry_point_name: ''
+experiment_id: '912748698813041948'
+lifecycle_stage: active
+run_id: d59546974f5b45e381b1e09d40c657f8
+run_name: local-mock-run
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1769596634341
+status: 3
+tags: []
+user_id: jettejohannadw

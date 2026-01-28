@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+import pickle
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
-import pickle
 import torch
 from torch.utils.data import Dataset
 
@@ -67,7 +67,9 @@ class TCGADataset(Dataset):
         self.records = [TCGARecord(pid=pid, y=pid_to_y[pid]) for pid in keep]
 
         if len(self.records) == 0:
-            raise RuntimeError("TCGADataset has 0 records after filtering/intersection.")
+            raise RuntimeError(
+                "TCGADataset has 0 records after filtering/intersection."
+            )
 
         # Infer visual embedding dimension (robust to (1,768))
         any_pid = self.records[0].pid

@@ -1,0 +1,6 @@
+artifact_location: file:///Users/jettejohannadw/mlops-assignment-FINAL/mlruns/912748698813041948
+creation_time: 1769596634232
+experiment_id: '912748698813041948'
+last_update_time: 1769596634232
+lifecycle_stage: active
+name: mlops-tcga-fusion
