@@ -6,3 +6,4 @@ experiments/results/
 .DS_Store
 *.egg-info/
 logs/
+venv/
