@@ -1,7 +1,8 @@
+import argparse
 import asyncio
 import json
-import argparse
 import os
+
 from openai import AsyncOpenAI
 from tqdm.asyncio import tqdm
 
@@ -24,15 +25,12 @@ async def process_item(client, item, args, semaphore, system_prompt: str):
                 messages=[
                     {
                         "role": "user",
-                        "content": f"{system_prompt}\n\nRAW REPORT:\n{raw_report}"
+                        "content": f"{system_prompt}\n\nRAW REPORT:\n{raw_report}",
                     }
                 ],
                 temperature=0.0,
                 top_p=0.1,
-                extra_body={
-                    "top_k": 1,
-                    "min_p": 0.0
-                },
+                extra_body={"top_k": 1, "min_p": 0.0},
                 max_tokens=args.max_tokens,
                 timeout=180,
             )
@@ -50,10 +48,7 @@ async def process_item(client, item, args, semaphore, system_prompt: str):
 async def run_batch(args):
     system_prompt = load_system_prompt(args.prompt)
 
-    client = AsyncOpenAI(
-        base_url=f"http://localhost:{args.port}/v1",
-        api_key="vllm"
-    )
+    client = AsyncOpenAI(base_url=f"http://localhost:{args.port}/v1", api_key="vllm")
     semaphore = asyncio.Semaphore(args.concurrency)
 
     # Resume support via pid
@@ -87,8 +82,7 @@ async def run_batch(args):
 
     print(f"Processing {len(data)} items...")
     tasks = [
-        process_item(client, item, args, semaphore, system_prompt)
-        for item in data
+        process_item(client, item, args, semaphore, system_prompt) for item in data
     ]
 
     os.makedirs(os.path.dirname(args.output), exist_ok=True)
@@ -96,9 +90,7 @@ async def run_batch(args):
     # Stream results to disk
     with open(args.output, "a", encoding="utf-8") as f:
         for future in tqdm(
-            asyncio.as_completed(tasks),
-            total=len(tasks),
-            desc="Inferencing Qwen3-4B"
+            asyncio.as_completed(tasks), total=len(tasks), desc="Inferencing Qwen3-4B"
         ):
             result = await future
             f.write(json.dumps(result, ensure_ascii=False) + "\n")

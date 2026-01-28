@@ -1,11 +1,11 @@
-import numpy as np
+import random
+
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torch.nn as nn
-from torch.optim import SGD, Adam
-from torch.utils.data import Dataset, DataLoader
-import random 
-import typing
+from torch.optim import Adam
+from torch.utils.data import DataLoader, Dataset
 
 # we zetten alle random seeds vast zodat de uitkomst elke keer hetzelfde is
 # dit maakt het makkelijker om resultaten te vergelijken en te debuggen
@@ -38,12 +38,13 @@ plt.scatter(input_data[:, 0], input_data[:, 1], c=y, alpha=0.5)
 plt.title("Generated Data Distribution")
 plt.grid()
 plt.savefig("data_distribution.png")
-plt.close() 
+plt.close()
+
 
 class Model(nn.Module):
-    def __init__(self, input_dim: int=2, hidden_dim: int=5, output: int=1):
+    def __init__(self, input_dim: int = 2, hidden_dim: int = 5, output: int = 1):
         super().__init__()
-        
+
         # eerste laag: van input_dim naar hidden_dim
         self.fc1 = nn.Linear(input_dim, hidden_dim)
         # tweede laag: van hidden_dim naar output (1 getal: kans op class 1)
@@ -57,12 +58,13 @@ class Model(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # forward betekent: hoe gaat data door het netwerk heen
-        output = self.fc1(x) 
+        output = self.fc1(x)
         output = self.relu(output)
         output = self.fc2(output)
         sigmoid = self.sigmoid(output)
         # we geven uiteindelijk de kans terug (tussen 0 en 1)
-        return sigmoid 
+        return sigmoid
+
 
 class ExampleData(Dataset):
     def __init__(self, datapoints: np.array, labels: np.array):
@@ -70,7 +72,7 @@ class ExampleData(Dataset):
         # zo kan PyTorch ermee trainen
         self.datapoints = torch.tensor(datapoints)
         self.labels = torch.tensor(labels)
-    
+
     def __len__(self):
         # hiermee weet de DataLoader hoeveel items er zijn
         return len(self.datapoints)
@@ -82,12 +84,15 @@ class ExampleData(Dataset):
         y = self.labels[index].float()
         return x, y
 
+
 # hieronder maken we nóg een model, maar nu met nn.Sequential
 # let op: dit overschrijft het Model hierboven, want we gebruiken dezelfde naam 'model'
 # dit netwerk is veel groter: input (2) -> 1024 neuronen -> output (1)
 # dropout p=0.5 betekent dat tijdens training de helft van de neuronen random wordt uitgezet
 # dat helpt tegen overfitting
-model = nn.Sequential(nn.Linear(2, 1024), nn.ReLU(), nn.Dropout(p=0.5), nn.Linear(1024, 1), nn.Sigmoid()) 
+model = nn.Sequential(
+    nn.Linear(2, 1024), nn.ReLU(), nn.Dropout(p=0.5), nn.Linear(1024, 1), nn.Sigmoid()
+)
 print(model)
 
 # we maken een Dataset object met alle punten en labels
@@ -110,7 +115,7 @@ criterion = nn.BCELoss()
 loss_list = []
 
 # we trainen 5 epochs
-for epoch in range(5):
+for _ in range(5):
     # elke epoch lopen we door alle batches heen
     for x, y in train_loader:
         # eerst gradients resetten

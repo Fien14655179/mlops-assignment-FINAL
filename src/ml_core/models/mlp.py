@@ -1,10 +1,11 @@
 import torch
 import torch.nn as nn
 
+
 class LateFusionMLP(nn.Module):
     def __init__(self, config: dict):
         super().__init__()
-        
+
         # Extract dimensions from config
         self.visual_dim = config.get("visual_dim", 768)
         self.text_dim = config.get("text_dim", 768)
@@ -24,7 +25,7 @@ class LateFusionMLP(nn.Module):
             nn.Linear(self.input_dim, self.hidden_dim),
             nn.ReLU(),
             nn.Dropout(self.dropout_rate),
-            nn.Linear(self.hidden_dim, self.num_classes)
+            nn.Linear(self.hidden_dim, self.num_classes),
         )
 
     def forward(self, x_vis=None, x_txt=None):
@@ -38,4 +39,3 @@ class LateFusionMLP(nn.Module):
             raise ValueError("Model received NO input!")
 
         return self.layers(x)
-

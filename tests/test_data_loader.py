@@ -35,15 +35,15 @@ class TestPCAMPipeline:
                 # nu voegen we expres rare / extreme gevallen toe om de code te testen
                 # sample 0: één pixel heeft een extreem hoge waarde (1e5)
                 # dit test of we correct clippen voordat we naar uint8 casten
-                data[0, 0, 0, :] = 1e5  
+                data[0, 0, 0, :] = 1e5
 
                 # sample 1: volledig zwart beeld (alles 0)
                 # dit is een outlier die je filter misschien weg moet gooien
-                data[1, :, :, :] = 0.0  
+                data[1, :, :, :] = 0.0
 
                 # sample 2: volledig wit beeld (alles 255)
                 # ook dit is een outlier die mean-based filtering zou moeten herkennen
-                data[2, :, :, :] = 255.0  
+                data[2, :, :, :] = 255.0
 
                 # nu maken we labels
                 # eerst alles 0 (negatieve class)

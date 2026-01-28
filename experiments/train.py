@@ -1,18 +1,21 @@
 import argparse
-import yaml
+from pathlib import Path
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from pathlib import Path
-from tqdm import tqdm
+import yaml
 
 # --- 1. Correct Imports based on your file tree ---
 from ml_core.data.tcga_loader import get_tcga_dataloaders
 from ml_core.models.mlp import MLP
+from tqdm import tqdm
+
 
 def load_config(path):
-    with open(path, 'r') as f:
+    with open(path, "r") as f:
         return yaml.safe_load(f)
+
 
 def main(args):
     # 2. Setup Device & Config
@@ -29,10 +32,10 @@ def main(args):
     # TRICK: We pass [768, 1, 1] so the MLP calculates 768 input features
     print("Initializing MLP...")
     model = MLP(
-        input_shape=[768, 1, 1], 
+        input_shape=[768, 1, 1],
         hidden_units=config["model"]["hidden_units"],
-        num_classes=config["model"]["num_classes"], # 32 classes
-        dropout_rate=config["model"]["dropout_rate"]
+        num_classes=config["model"]["num_classes"],  # 32 classes
+        dropout_rate=config["model"]["dropout_rate"],
     )
     model.to(device)
 
@@ -44,7 +47,7 @@ def main(args):
     epochs = config["training"]["epochs"]
     save_dir = Path(config["training"]["save_dir"])
     save_dir.mkdir(parents=True, exist_ok=True)
-    
+
     print(f"Starting training for {epochs} epochs...")
 
     for epoch in range(epochs):
@@ -53,21 +56,21 @@ def main(args):
         train_loss = 0
         correct = 0
         total = 0
-        
+
         for x, y, _ in tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]"):
             x, y = x.to(device), y.to(device)
-            
+
             optimizer.zero_grad()
-            output = model(x) # MLP flattens [Batch, 768] automatically
+            output = model(x)  # MLP flattens [Batch, 768] automatically
             loss = criterion(output, y)
             loss.backward()
             optimizer.step()
-            
+
             train_loss += loss.item()
             _, predicted = torch.max(output, 1)
             total += y.size(0)
             correct += (predicted == y).sum().item()
-            
+
         train_acc = 100 * correct / total
         avg_train_loss = train_loss / len(train_loader)
 
@@ -75,7 +78,7 @@ def main(args):
         model.eval()
         val_correct = 0
         val_total = 0
-        
+
         with torch.no_grad():
             for x, y, _ in val_loader:
                 x, y = x.to(device), y.to(device)
@@ -83,15 +86,18 @@ def main(args):
                 _, predicted = torch.max(output, 1)
                 val_total += y.size(0)
                 val_correct += (predicted == y).sum().item()
-        
+
         val_acc = 100 * val_correct / val_total
 
-        print(f"Epoch {epoch+1}: Train Loss={avg_train_loss:.4f}, Train Acc={train_acc:.2f}% | Val Acc={val_acc:.2f}%")
+        print(
+            f"Epoch {epoch+1}: Train Loss={avg_train_loss:.4f}, Train Acc={train_acc:.2f}% | Val Acc={val_acc:.2f}%"
+        )
 
     # 7. Save Model
     save_path = save_dir / "tcga_mlp.pth"
     torch.save(model.state_dict(), save_path)
     print(f"Model saved to {save_path}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

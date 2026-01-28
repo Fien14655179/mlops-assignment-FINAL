@@ -30,8 +30,14 @@ def get_tcga_dataloaders(cfg: dict) -> Tuple[DataLoader, DataLoader, DataLoader]
     batch_size = int(data_cfg.get("batch_size", 64))
     num_workers = int(data_cfg.get("num_workers", 2))
 
-    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers)
-    test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    train_loader = DataLoader(
+        train_ds, batch_size=batch_size, shuffle=True, num_workers=num_workers
+    )
+    val_loader = DataLoader(
+        val_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers
+    )
+    test_loader = DataLoader(
+        test_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers
+    )
 
     return train_loader, val_loader, test_loader

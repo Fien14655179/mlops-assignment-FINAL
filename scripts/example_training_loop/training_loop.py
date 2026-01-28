@@ -74,7 +74,7 @@ for epoch in range(3):
 
         # af en toe printen we een status update zodat je ziet dat het loopt
         # i % 100 == 0 betekent: bij stap 0, 100, 200, ...
-        if i % 100 == 0: 
+        if i % 100 == 0:
             print(f"Epoch {epoch+1}, Step {i}, Loss: {loss.item():.4f}")
 
     # gemiddelde training loss voor deze epoch

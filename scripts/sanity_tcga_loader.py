@@ -1,6 +1,6 @@
 from pathlib import Path
-import yaml
 
+import yaml
 from ml_core.data import get_tcga_dataloaders
 
 cfg_path = Path("experiments/configs/train_config.yaml")
@@ -13,6 +13,11 @@ print("Batch x:", xb.shape, xb.dtype)
 print("Batch y:", yb.shape, yb.dtype)
 print("Example pid:", pidb[0])
 
-print("Train/Val/Test sizes:", len(train_loader.dataset), len(val_loader.dataset), len(test_loader.dataset))
+print(
+    "Train/Val/Test sizes:",
+    len(train_loader.dataset),
+    len(val_loader.dataset),
+    len(test_loader.dataset),
+)
 print("Vis dim:", train_loader.dataset.vis_dim)
 print("Num classes:", len(train_loader.dataset.class_to_idx))
