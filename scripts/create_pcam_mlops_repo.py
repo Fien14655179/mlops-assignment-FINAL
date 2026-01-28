@@ -1,5 +1,5 @@
-import os
 from pathlib import Path
+
 
 def create_file(path, content=""):
     """Creates a file with specific content, ensuring parent directories exist."""

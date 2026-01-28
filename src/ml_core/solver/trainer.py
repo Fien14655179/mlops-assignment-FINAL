@@ -1,12 +1,8 @@
-import time
 from typing import Any, Dict, Tuple
 
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from tqdm import tqdm
-
-from ..utils import ExperimentTracker, setup_logger
 
 
 class Trainer:
@@ -59,7 +55,7 @@ class Trainer:
         
         print(f"Starting training for {epochs} epochs...")
         
-        for epoch in range(epochs):
+        for _ in range(epochs):
             # TODO: Call train_epoch and validate
             # TODO: Log metrics to tracker
             # TODO: Save checkpoints

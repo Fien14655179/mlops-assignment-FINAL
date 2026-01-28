@@ -1,9 +1,8 @@
 import logging
-import random
-import numpy as np
-import torch
-import yaml
 from typing import Any, Dict
+
+import yaml
+
 
 def setup_logger(name: str = "MLOps_Course") -> logging.Logger:
     """Configures a standardized logger."""

@@ -1,9 +1,10 @@
 import argparse
 from pathlib import Path
 from typing import Optional
-import pandas as pd
+
 import matplotlib.pyplot as plt
-import seaborn as sns
+import pandas as pd
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Plot training metrics.")
@@ -23,7 +24,8 @@ def plot_metrics(df: pd.DataFrame, output_path: Optional[Path]):
     """
     Generate and save plots for Loss, Accuracy, and F1.
     """
-    if df is None: return
+    if df is None: 
+        return
 
     # Create a figure with subplots
     fig, axes = plt.subplots(2, 2, figsize=(16, 10))

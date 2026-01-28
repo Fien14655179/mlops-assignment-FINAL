@@ -1,6 +1,5 @@
 import argparse
-import torch
-import torch.optim as optim
+
 # from ml_core.data import get_dataloaders
 # from ml_core.models import MLP
 # from ml_core.solver import Trainer

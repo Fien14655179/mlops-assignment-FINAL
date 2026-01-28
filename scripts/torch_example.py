@@ -1,11 +1,11 @@
-import numpy as np
+import random
+
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torch.nn as nn
-from torch.optim import SGD, Adam
-from torch.utils.data import Dataset, DataLoader
-import random 
-import typing
+from torch.optim import Adam
+from torch.utils.data import DataLoader, Dataset
 
 np.random.seed(1)
 torch.manual_seed(1)
@@ -76,7 +76,7 @@ criterion = nn.BCELoss()
 
 loss_list = []
 
-for epoch in range(5):
+for _ in range(5):
     for x, y in train_loader:
         # shape x: [4,2]
         optimizer.zero_grad()
