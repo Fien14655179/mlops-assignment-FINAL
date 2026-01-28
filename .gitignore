@@ -8,6 +8,7 @@ experiments/results/
 
 # Python env
 .venv/
+venv/
 
 # Local data (never commit)
 data/tcga/
@@ -20,3 +21,4 @@ data/**
 
 # vLLM outputs
 vllm_outputs/
+logs/

@@ -1,4 +1,3 @@
-from .mlp import MLP
+from .mlp import LateFusionMLP
 
-# This stops linters from thinking MLP is "unused".
-__all__ = ["MLP"]
+__all__ = ["LateFusionMLP"]
