@@ -1,18 +1,20 @@
 import argparse
-import yaml
+
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
 import torch
 import umap
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from torch.utils.data import DataLoader
-from ml_core.models.mlp import LateFusionMLP
+import yaml
 from ml_core.data.dataset import TCGAMultimodalDataset
+from ml_core.models.mlp import LateFusionMLP
+from torch.utils.data import DataLoader
+
 
 def visualize(model_path, config_path, output_path):
     # we lezen eerst de config in zodat we precies weten hoe de data en het model zijn ingesteld
     # dit zorgt dat deze visualisatie altijd klopt met de training-instellingen
-    with open(config_path, 'r') as f:
+    with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
     # we maken een dataset voor de test-split
@@ -29,7 +31,7 @@ def visualize(model_path, config_path, output_path):
 
     # we laden de opgeslagen gewichten in het model
     # map_location='cpu' betekent: we kunnen dit ook draaien zonder GPU
-    model.load_state_dict(torch.load(model_path, map_location='cpu'))
+    model.load_state_dict(torch.load(model_path, map_location="cpu"))
 
     # eval-modus: geen dropout en geen training-gedrag
     model.eval()
@@ -55,13 +57,13 @@ def visualize(model_path, config_path, output_path):
             # anders gebruiken we alleen tekst
             else:
                 x = x_txt
-            
+
             # we willen nu niet de eind-output (class scores) visualiseren
             # maar de 'verborgen laag' waar het model representaties leert
             # daarom voeren we handmatig de eerste lagen uit
             hidden = model.layers[0](x)
             hidden = model.layers[1](hidden)
-            
+
             # we slaan de verborgen representaties op als numpy arrays
             # later plakken we alles samen in één grote matrix
             features_list.append(hidden.numpy())
@@ -82,29 +84,30 @@ def visualize(model_path, config_path, output_path):
     # nu maken we een scatterplot van de 2D embedding
     plt.figure(figsize=(12, 10))
     sns.scatterplot(
-        x=embedding[:, 0], 
-        y=embedding[:, 1], 
+        x=embedding[:, 0],
+        y=embedding[:, 1],
         # hue=labels betekent: kleur per label/class
-        hue=labels, 
+        hue=labels,
         # tab20 geeft veel verschillende kleuren, handig voor meerdere classes
-        palette="tab20", 
+        palette="tab20",
         legend="full",
         # puntgrootte klein houden omdat er veel punten zijn
-        s=15
+        s=15,
     )
 
     # titel zodat duidelijk is wat je ziet
     plt.title("Latent Space Visualization (UMAP)")
 
     # legenda naar de zijkant zetten zodat het plotvlak niet te vol wordt
-    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize='small', ncol=2)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", fontsize="small", ncol=2)
 
     # tight_layout zodat alles netjes in het figuur past
     plt.tight_layout()
-    
+
     # opslaan naar bestand
     plt.savefig(output_path)
     print(f"Plot saved to {output_path}")
+
 
 if __name__ == "__main__":
     # dit stuk zorgt dat je dit script vanuit de terminal kunt runnen met argumenten

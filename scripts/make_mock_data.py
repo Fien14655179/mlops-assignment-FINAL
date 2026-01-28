@@ -1,8 +1,9 @@
-import pickle
 import json
+import pickle
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-from pathlib import Path
 
 # we maken een pad aan naar de map waar alle data in komt
 # Path is handig omdat het netjes werkt op elk besturingssysteem

@@ -1,10 +1,12 @@
 import json
 import pickle
 from pathlib import Path
+
 import numpy as np
+import pandas as pd
 import torch
 from torch.utils.data import Dataset
-import pandas as pd
+
 
 class TCGAMultimodalDataset(Dataset):
     def __init__(self, split: str, cfg: dict):
@@ -17,7 +19,7 @@ class TCGAMultimodalDataset(Dataset):
         self.text_path = data_cfg["text_embeddings_path"]
         self.splits_dir = Path(data_cfg["splits_dir"])
         self.modality = model_cfg.get("modality", "multimodal")
-        
+
         # 1. Load PIDs
         with open(self.splits_dir / f"{split}.json", "r") as f:
             self.patient_ids = json.load(f)
@@ -33,7 +35,7 @@ class TCGAMultimodalDataset(Dataset):
         # 4. Load Labels
         with open(data_cfg["label_mapping"], "r") as f:
             self.class_to_idx = json.load(f)
-            
+
         df = pd.read_csv(data_cfg["labels_path"])
         self.pid_to_label = dict(zip(df["patient_id"], df["cancer_type"]))
 
@@ -45,7 +47,7 @@ class TCGAMultimodalDataset(Dataset):
 
         # A. Visual (Mean Pooling)
         vis_emb = self.visual_data.get(pid, np.zeros(768))
-        if isinstance(vis_emb, list): # If multiple images
+        if isinstance(vis_emb, list):  # If multiple images
             vis_emb = np.mean(vis_emb, axis=0)
         x_vis = torch.tensor(vis_emb, dtype=torch.float32)
 
