@@ -3,7 +3,7 @@
 #SBATCH --partition=gpu_course
 #SBATCH --gpus-per-node=1
 #SBATCH --ntasks=1
-#SBATCH --mem=8G
+#SBATCH --mem=16G
 #SBATCH --cpus-per-task=2
 #SBATCH --time=00:20:00
 #SBATCH --output=logs/vllm_batch_decoding_%j.log
@@ -11,23 +11,17 @@
 
 set -euo pipefail
 
-# --- Parameters ---
-export PORT=$(shuf -i 10000-60000 -n 1)   # random port
+export PORT=$(shuf -i 10000-60000 -n 1)
 export CONTAINER_PATH="/projects/2/managed_datasets/containers/vllm/cuda-13.0-vllm.sif"
 MODEL="Qwen/Qwen3-4B-AWQ"
-MODE="no_think"
+
 CONCURRENCY=8
+MAX_TOKENS=1024
 
-# --- Choose your input/output ---
-# Mini-test:
-INPUT_FILE="./data/processed/text/v1/decoder_input_test_fresh.jsonl"
-OUTPUT_FILE="./data/processed/text/v1/decoder_output_test_fresh.jsonl"
+INPUT_FILE="./data/processed/text/v1/decoder_input_test.jsonl"
+OUTPUT_FILE="./data/processed/text/v1/decoder_output_test_v3.jsonl"
 
-# Full run:
-# INPUT_FILE="./data/processed/text/v1/decoder_input_train.jsonl"
-# OUTPUT_FILE="./data/processed/text/v1/decoder_output_train.jsonl"
-
-# Check folders exist
+mkdir -p logs
 mkdir -p "$(dirname "$OUTPUT_FILE")"
 
 echo "[INFO] NODE=$(hostname)"
@@ -35,7 +29,6 @@ echo "[INFO] INPUT_FILE=$INPUT_FILE"
 echo "[INFO] OUTPUT_FILE=$OUTPUT_FILE"
 echo "[INFO] PORT=$PORT"
 
-# --- Start vLLM Server in background ---
 apptainer exec --nv -B "$PWD" "$CONTAINER_PATH" \
   vllm serve "$MODEL" \
     --host 127.0.0.1 \
@@ -47,8 +40,7 @@ apptainer exec --nv -B "$PWD" "$CONTAINER_PATH" \
 SERVER_PID=$!
 echo "[INFO] vLLM server PID=$SERVER_PID"
 
-# --- Wait until server is ready ---
-echo "[INFO] Waiting for vLLM server to be ready..."
+echo "[INFO] Waiting for vLLM server..."
 while ! curl -s "http://127.0.0.1:$PORT/v1/models" > /dev/null; do
     if ! kill -0 $SERVER_PID 2>/dev/null; then
         echo "[ERROR] vLLM server failed to start."
@@ -58,16 +50,14 @@ while ! curl -s "http://127.0.0.1:$PORT/v1/models" > /dev/null; do
 done
 echo "[INFO] vLLM server is ready!"
 
-# --- Run decoder ---
 apptainer exec --nv -B "$PWD" "$CONTAINER_PATH" \
   python3 python_scripts/batch_inference_decoder.py \
     --input "$INPUT_FILE" \
     --output "$OUTPUT_FILE" \
     --port $PORT \
-    --mode "$MODE" \
-    --concurrency $CONCURRENCY
+    --concurrency $CONCURRENCY \
+    --max_tokens $MAX_TOKENS
 
-# --- Stop server ---
 kill $SERVER_PID || true
 sleep 2
 echo "[INFO] Done."
