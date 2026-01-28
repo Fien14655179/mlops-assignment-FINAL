@@ -1,20 +1,23 @@
-experiment_name: "pcam_mlp_baseline"
+experiment_name: "tcga_mlp_baseline"
 seed: 42
 
 data:
-  dataset_type: "pcam"
-  # TODO: download the dataset and set the relative path here
-  data_path: "./data/camelyonpatch_level_2" 
-  input_shape: [3, 96, 96]
-  batch_size: 32
+  dataset_type: "tcga"
+  # Points to the 'data' folder containing 'tcga' and 'splits' subfolders
+  data_dir: "data" 
+  # This acts as documentation since we hardcoded [768, 1, 1] in train.py
+  input_shape: [768, 1, 1] 
+  batch_size: 64
   num_workers: 2
 
 model:
-  hidden_units: [64, 32]
+  # Adjusted for 768-dim embeddings (vs 96x96 images)
+  hidden_units: [256, 128]
   dropout_rate: 0.2
-  num_classes: 2
+  # CRITICAL: Report says 32 cancer types (LAML is missing)
+  num_classes: 32
 
 training:
-  epochs: 5
+  epochs: 20
   learning_rate: 0.001
   save_dir: "./experiments/results"

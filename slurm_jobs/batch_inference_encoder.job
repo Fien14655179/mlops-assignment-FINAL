@@ -1,0 +1,68 @@
+#!/bin/bash
+#SBATCH --job-name=qwen_embed_srv
+#SBATCH --partition=gpu_course
+#SBATCH --gpus-per-node=1
+#SBATCH --ntasks=1
+#SBATCH --mem=16G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=00:20:00
+#SBATCH --output=logs/vllm_batch_encoding_%j.log
+#SBATCH --error=logs/vllm_batch_encoding_%j.err
+
+set -euo pipefail
+
+export PORT=$(shuf -i 10000-60000 -n 1)
+export CUDA_VISIBLE_DEVICES=0
+export VLLM_LOGGING_LEVEL=INFO
+
+CONTAINER="/projects/2/managed_datasets/containers/vllm/cuda-13.0-vllm.sif"
+MODEL="Qwen/Qwen3-Embedding-0.6B"
+CONCURRENCY=32
+
+# Input = decoder v3 cleaned output
+INPUT_FILE="./data/processed/text/v1/decoder_output_test_v3.jsonl"
+OUTPUT_FILE="./data/processed/text/v1/encoder_embeddings_test.pkl"
+
+mkdir -p logs
+mkdir -p "$(dirname "$OUTPUT_FILE")"
+
+# --- Start vLLM embedding server ---
+apptainer exec --nv -B "$PWD" "$CONTAINER" \
+  vllm serve "$MODEL" \
+  --host 127.0.0.1 \
+  --port $PORT \
+  --task embed \
+  --trust-remote-code \
+  --gpu-memory-utilization 0.8 \
+  --max-num-seqs $CONCURRENCY \
+  --max-model-len 4096 > logs/vllm_server_%j.log 2>&1 &
+
+SERVER_PID=$!
+echo "[INFO] vLLM server PID=$SERVER_PID"
+
+# --- Wait for server ---
+echo "Waiting for vLLM embedding server..."
+while ! curl -s "http://127.0.0.1:$PORT/v1/models" > /dev/null; do
+    if ! kill -0 $SERVER_PID 2>/dev/null; then
+        echo "Error: vLLM embedding server failed to start."
+        exit 1
+    fi
+    sleep 2
+done
+echo "[INFO] Embedding server ready!"
+
+# --- Run encoder ---
+apptainer exec --nv -B "$PWD" "$CONTAINER" \
+  python3 ./python_scripts/batch_inference_encoder.py \
+    --input "$INPUT_FILE" \
+    --output "$OUTPUT_FILE" \
+    --port $PORT \
+    --is_query \
+    --task_description "Given the following, what diagnosis is the text alluding to most likely? Answer as if you were an experienced expert pathologist." \
+    --concurrency $CONCURRENCY
+
+# --- Cleanup ---
+echo "[INFO] Processing complete. Shutting down server..."
+kill $SERVER_PID || true
+sleep 2
+echo "[INFO] Done."

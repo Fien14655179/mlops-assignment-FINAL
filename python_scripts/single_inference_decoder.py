@@ -1,8 +1,7 @@
-import argparse
 import asyncio
 import json
+import argparse
 import os
-
 from openai import AsyncOpenAI
 from tqdm.asyncio import tqdm
 
@@ -13,7 +12,6 @@ def load_system_prompt(path: str) -> str:
 
 
 async def process_item(client, item, args, semaphore, system_prompt: str):
-    # Extract raw report text only
     raw_report = item.get("report") or item.get("text") or item.get("response") or ""
     if not isinstance(raw_report, str):
         raw_report = str(raw_report)
@@ -23,10 +21,8 @@ async def process_item(client, item, args, semaphore, system_prompt: str):
             response = await client.chat.completions.create(
                 model="Qwen/Qwen3-4B-AWQ",
                 messages=[
-                    {
-                        "role": "user",
-                        "content": f"{system_prompt}\n\nRAW REPORT:\n{raw_report}",
-                    }
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"/no_think\nRAW REPORT:\n{raw_report}"},
                 ],
                 temperature=0.0,
                 top_p=0.1,
@@ -48,10 +44,12 @@ async def process_item(client, item, args, semaphore, system_prompt: str):
 async def run_batch(args):
     system_prompt = load_system_prompt(args.prompt)
 
-    client = AsyncOpenAI(base_url=f"http://localhost:{args.port}/v1", api_key="vllm")
+    client = AsyncOpenAI(
+        base_url=f"http://127.0.0.1:{args.port}/v1",
+        api_key="vllm",
+    )
     semaphore = asyncio.Semaphore(args.concurrency)
 
-    # Resume support via pid
     processed_pids = set()
     if os.path.exists(args.output):
         with open(args.output, "r", encoding="utf-8") as f:
@@ -64,7 +62,6 @@ async def run_batch(args):
                     continue
         print(f"Resuming: Found {len(processed_pids)} items already processed.")
 
-    # Load input
     data = []
     print(f"Reading input from {args.input}...")
     with open(args.input, "r", encoding="utf-8") as f:
@@ -82,16 +79,14 @@ async def run_batch(args):
 
     print(f"Processing {len(data)} items...")
     tasks = [
-        process_item(client, item, args, semaphore, system_prompt) for item in data
+        process_item(client, item, args, semaphore, system_prompt)
+        for item in data
     ]
 
     os.makedirs(os.path.dirname(args.output), exist_ok=True)
 
-    # Stream results to disk
     with open(args.output, "a", encoding="utf-8") as f:
-        for future in tqdm(
-            asyncio.as_completed(tasks), total=len(tasks), desc="Inferencing Qwen3-4B"
-        ):
+        for future in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Inferencing Qwen3-4B"):
             result = await future
             f.write(json.dumps(result, ensure_ascii=False) + "\n")
             f.flush()
@@ -100,13 +95,11 @@ async def run_batch(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Batch Inference Decoder (Qwen3-4B-AWQ)"
-    )
+    parser = argparse.ArgumentParser(description="Batch Inference Decoder (Qwen3-4B-AWQ)")
     parser.add_argument("--input", type=str, required=True)
     parser.add_argument("--output", type=str, required=True)
     parser.add_argument("--port", type=int, default=8000)
-    parser.add_argument("--max_tokens", type=int, default=256)
+    parser.add_argument("--max_tokens", type=int, default=1024)
     parser.add_argument("--concurrency", type=int, default=8)
     parser.add_argument(
         "--prompt",
@@ -114,6 +107,5 @@ if __name__ == "__main__":
         default="data/processed/text/v1/prompt.txt",
         help="Path to decoder prompt text file",
     )
-
     args = parser.parse_args()
     asyncio.run(run_batch(args))

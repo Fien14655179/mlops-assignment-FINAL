@@ -23,17 +23,14 @@ dependencies = [
     "tqdm",
     "pyyaml",
     "python-dotenv",
-    # Dev tools
+    "mlflow",
     "pytest",
     "ruff",
     "pre-commit",
 ]
 
-# --- TOOL CONFIGURATION ---
 [tool.ruff]
-# Exclude a variety of commonly ignored directories.
 exclude = [".git", "__pycache__", "venv"]
-# Same as Black.
 line-length = 88
 indent-width = 4
 

@@ -1,35 +1,41 @@
-from typing import List
-
 import torch
 import torch.nn as nn
 
 
-class MLP(nn.Module):
-    def __init__(
-        self,
-        input_shape: List[int],
-        hidden_units: List[int],
-        num_classes: int = 2,
-        dropout_rate: float = 0.2,
-    ):
+class LateFusionMLP(nn.Module):
+    def __init__(self, config: dict):
         super().__init__()
 
-        self.input_dim = input_shape[0] * input_shape[1] * input_shape[2]
-        layers = []
-        in_features = self.input_dim
+        # Extract dimensions from config
+        self.visual_dim = config.get("visual_dim", 768)
+        self.text_dim = config.get("text_dim", 768)
+        self.hidden_dim = config.get("hidden_dim", 256)
+        self.num_classes = config.get("num_classes", 32)
+        self.dropout_rate = config.get("dropout", 0.2)
 
-        for hidden in hidden_units:
-            layers.append(nn.Linear(in_features, hidden))
-            layers.append(nn.ReLU())
-            layers.append(nn.Dropout(dropout_rate))
-            in_features = hidden
+        # Determine input dimension
+        self.input_dim = 0
+        if self.visual_dim > 0:
+            self.input_dim += self.visual_dim
+        if self.text_dim > 0:
+            self.input_dim += self.text_dim
 
-        # map to num_classes (e.g., 2 for binary because we are using CrossEntropyLoss)
-        layers.append(nn.Linear(in_features, num_classes))
+        # Define the layers
+        self.layers = nn.Sequential(
+            nn.Linear(self.input_dim, self.hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(self.dropout_rate),
+            nn.Linear(self.hidden_dim, self.num_classes),
+        )
 
-        self.network = nn.Sequential(*layers)
-        self.flatten = nn.Flatten()
+    def forward(self, x_vis=None, x_txt=None):
+        if x_vis is not None and x_txt is None:
+            x = x_vis
+        elif x_txt is not None and x_vis is None:
+            x = x_txt
+        elif x_vis is not None and x_txt is not None:
+            x = torch.cat((x_vis, x_txt), dim=1)
+        else:
+            raise ValueError("Model received NO input!")
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.flatten(x)
-        return self.network(x)
+        return self.layers(x)
