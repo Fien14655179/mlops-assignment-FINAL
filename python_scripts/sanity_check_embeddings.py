@@ -4,7 +4,7 @@ import pickle
 
 import numpy as np
 
-# --- Config --- 
+# --- Config ---
 ENCODER_PKL = "./data/processed/text/v1/encoder_embeddings_test.pkl"
 DECODER_JSONL = "./data/processed/text/v1/decoder_output_test_v3.jsonl"
 
@@ -45,7 +45,9 @@ for pid in list(embeddings.keys())[:5]:
         all_shapes_correct = False
     # Check min/max/mean
     min_val, max_val, mean_val = emb.min(), emb.max(), emb.mean()
-    print(f"PID {pid}: shape={emb.shape}, min={min_val:.6f}, max={max_val:.6f}, mean={mean_val:.6f}")
+    print(
+        f"PID {pid}: shape={emb.shape}, min={min_val:.6f}, max={max_val:.6f}, mean={mean_val:.6f}"
+    )
     if np.all(emb == 0):
         print(f"[WARNING] PID {pid} embedding is all zeros!")
         all_values_valid = False

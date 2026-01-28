@@ -35,16 +35,17 @@ def main() -> None:
         "Expected 1 label per patient_id after filtering. "
         "If duplicates exist, we need to decide aggregation."
     )
-    assert df["patient_id"].nunique() == len(pids_with_emb), (
-        "Mismatch between pids in embeddings and filtered label table."
-    )
+    assert df["patient_id"].nunique() == len(
+        pids_with_emb
+    ), "Mismatch between pids in embeddings and filtered label table."
 
     # --- Stratified split on cancer_type ---
     pids = df["patient_id"].tolist()
     y = df["cancer_type"].tolist()
 
     p_train, p_temp, y_train, y_temp = train_test_split(
-        pids, y,
+        pids,
+        y,
         test_size=(test_size + val_size),
         random_state=seed,
         stratify=y,
@@ -53,7 +54,8 @@ def main() -> None:
     # Split temp into val and test (val proportion inside temp)
     val_ratio_in_temp = val_size / (test_size + val_size)
     p_val, p_test, y_val, y_test = train_test_split(
-        p_temp, y_temp,
+        p_temp,
+        y_temp,
         test_size=(1 - val_ratio_in_temp),
         random_state=seed,
         stratify=y_temp,

@@ -23,7 +23,10 @@ async def process_item(client, item, args, semaphore, system_prompt: str):
                 model="Qwen/Qwen3-4B-AWQ",
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f"/no_think\nRAW REPORT:\n{raw_report}"},
+                    {
+                        "role": "user",
+                        "content": f"/no_think\nRAW REPORT:\n{raw_report}",
+                    },
                 ],
                 temperature=0.0,
                 top_p=0.1,
@@ -80,14 +83,15 @@ async def run_batch(args):
 
     print(f"Processing {len(data)} items...")
     tasks = [
-        process_item(client, item, args, semaphore, system_prompt)
-        for item in data
+        process_item(client, item, args, semaphore, system_prompt) for item in data
     ]
 
     os.makedirs(os.path.dirname(args.output), exist_ok=True)
 
     with open(args.output, "a", encoding="utf-8") as f:
-        for future in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Inferencing Qwen3-4B"):
+        for future in tqdm(
+            asyncio.as_completed(tasks), total=len(tasks), desc="Inferencing Qwen3-4B"
+        ):
             result = await future
             f.write(json.dumps(result, ensure_ascii=False) + "\n")
             f.flush()
@@ -96,7 +100,9 @@ async def run_batch(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Batch Inference Decoder (Qwen3-4B-AWQ)")
+    parser = argparse.ArgumentParser(
+        description="Batch Inference Decoder (Qwen3-4B-AWQ)"
+    )
     parser.add_argument("--input", type=str, required=True)
     parser.add_argument("--output", type=str, required=True)
     parser.add_argument("--port", type=int, default=8000)
