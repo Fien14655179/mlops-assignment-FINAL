@@ -18,8 +18,15 @@ MODEL="Qwen/Qwen3-4B-AWQ"
 CONCURRENCY=8
 MAX_TOKENS=1024
 
-INPUT_FILE="./data/processed/text/v1/decoder_input_test.jsonl"
-OUTPUT_FILE="./data/processed/text/v1/decoder_output_test_v3.jsonl"
+# Train
+INPUT_FILE="./data/processed/text/v1/decoder_input_train.jsonl"
+OUTPUT_FILE="./data/processed/text/v1/decoder_output_train.jsonl"
+sbatch slurm_jobs/batch_inference_decoder.job
+
+# Val
+INPUT_FILE="./data/processed/text/v1/decoder_input_val.jsonl"
+OUTPUT_FILE="./data/processed/text/v1/decoder_output_val.jsonl"
+sbatch slurm_jobs/batch_inference_decoder.job
 
 mkdir -p logs
 mkdir -p "$(dirname "$OUTPUT_FILE")"
@@ -61,3 +68,4 @@ apptainer exec --nv -B "$PWD" "$CONTAINER_PATH" \
 kill $SERVER_PID || true
 sleep 2
 echo "[INFO] Done."
+tail -f logs/*18830519*.log
