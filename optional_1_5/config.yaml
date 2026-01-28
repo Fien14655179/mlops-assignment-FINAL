@@ -1,0 +1,31 @@
+experiment:
+  name: tcga_multimodal_hpo
+  tracking_uri: file:./mlruns
+
+data:
+  visual_embeddings_path: tcga_data/tcga_titan_embeddings.pkl
+  text_embeddings_path: data/embeddings/tcga_text_embeddings.pkl
+  labels_path: tcga_data/tcga_patient_to_cancer_type.csv
+  splits_dir: data/splits
+
+model:
+  modality: multimodal   
+  input_dim_visual: 768
+  input_dim_text: 768
+  hidden_dims: [512, 256]
+  dropout: 0.3
+  num_classes: 33
+
+training:
+  batch_size: 64
+  epochs: 20
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  seed: 42
+
+hpo:
+  learning_rates: [0.0003, 0.0005, 0.001]
+  dropouts: [0.2, 0.3, 0.5]
+  hidden_dims:
+    - [512, 256]
+    - [1024, 512]
