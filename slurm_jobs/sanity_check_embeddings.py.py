@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import pickle
-import numpy as np
 import json
+import pickle
+
+import numpy as np
 
 # --- Config --- 
 ENCODER_PKL = "./data/processed/text/v1/encoder_embeddings_test.pkl"

@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import yaml
-
 from ml_core.data import get_tcga_dataloaders
 
 cfg_path = Path("experiments/configs/train_config.yaml")

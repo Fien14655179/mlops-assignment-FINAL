@@ -5,11 +5,11 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import yaml
-from tqdm import tqdm
 
 # --- 1. Correct Imports based on your file tree ---
 from ml_core.data.tcga_loader import get_tcga_dataloaders
 from ml_core.models.mlp import MLP
+from tqdm import tqdm
 
 
 def load_config(path):

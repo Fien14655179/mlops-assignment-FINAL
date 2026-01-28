@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import json
+import pickle
 from pathlib import Path
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
-import pickle
 
 
 def main() -> None:

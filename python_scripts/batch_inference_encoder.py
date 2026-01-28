@@ -1,11 +1,13 @@
+import argparse
 import asyncio
 import json
-import argparse
 import os
 import pickle
+
 import numpy as np
 from openai import AsyncOpenAI
 from tqdm.asyncio import tqdm
+
 
 def get_detailed_instruct(task_description: str, query: str) -> str:
     return f'Instruct: {task_description}\nQuery:{query}'
